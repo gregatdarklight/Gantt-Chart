@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * @author Dimitry Kudrayvtsev
  * @version 2.x
  */
@@ -14,12 +14,12 @@ d3.gantt = function () {
 		bottom : 20,
 		left : 150
 	};
-	
+
 	//default rectangle rounding in pixels
 	var rectRound=5;
 	//default : there is no horizontal lines in gantt chart.
 	var horizontalLines = false;
-	
+
 	var timeDomainStart = d3.time.day.offset(new Date(), -3);
 	var timeDomainEnd = d3.time.hour.offset(new Date(), +3);
 	var timeDomainMode = FIT_TIME_DOMAIN_MODE; // fixed or fit
@@ -27,7 +27,7 @@ d3.gantt = function () {
 	var taskStatus = [];
 	var height = document.body.clientHeight - margin.top - margin.bottom - 5;
 	var width = document.body.clientWidth - margin.right - margin.left - 5;
-	
+
 	var tickFormat = "%H:%M";
 
 	var tipBar, tipYAxis;
@@ -36,7 +36,7 @@ d3.gantt = function () {
 	var y;
 	var xAxis;
 	var yAxis;
-	
+
 	var keyFunction = function (d) {
 		return d.startDate + d.taskName + d.endDate;
 	};
@@ -49,22 +49,22 @@ d3.gantt = function () {
 		var format = d3.time.format("%H:%M:%S");
 		return d.taskName + " - " + format(d.startDate) + " > " + format(d.endDate);
 	};
-		
+
 	var clickFunctionOverriden = false;
 	var clickFunction = function (d) {
 		return;
 	};
-	
+
 	var activateZooming = false;
 	var zoomed = function(tasks) { //zoomed function
 		var svg = d3.select(".chart");
 		//update x axis only while zooming
 		svg.select(".x.axis").call(xAxis);
-		
+
 		var rectGroup = svg.select(".rect-group");
 		//move right and left lines
 		rectGroup.selectAll("line").attr("transform", "translate(" + [d3.event.translate[0], 0] + ") scale(" + d3.event.scale + ", 1)");
-		
+
 		//move tasks
 		rectGroup.selectAll("rect").data(tasks, keyFunction)
 			//function of update of the tasks : no exit nor enter while zooming.
@@ -73,8 +73,8 @@ d3.gantt = function () {
 				return (x(d.endDate) - x(d.startDate));
 		});
 	};
-	
-	
+
+
 	var initTimeDomain = function (tasks) {
 		if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
 			if (tasks === undefined || tasks.length < 1) {
@@ -100,11 +100,11 @@ d3.gantt = function () {
 		if (!activateZooming) {
 			x.clamp(true);
 		}
-			
+
 		y = d3.scale.ordinal()
 			.domain(taskTypes)
 			.rangeRoundBands([0, height - margin.top - margin.bottom], .1);
-			
+
 		xAxis = d3.svg.axis()
 			.scale(x)
 			.orient("bottom")
@@ -122,18 +122,18 @@ d3.gantt = function () {
 			.orient("left")
 			.tickSize(tickSizeWidth);
 	};
-		
+
 	var updateFontSizeYAxis = function() {
 		//compute the height of the font for the yAxis (necessary for lots of values).
 		var currYAxis = d3.select(".y.axis text");
 		if (!currYAxis.empty()) {
 			var currFontHeight = parseInt(d3.select(".y.axis text").style("font-size"));
 			var newFontHeight = Math.round((height - margin.top - margin.bottom) / taskTypes.length) + 2;
-			if (newFontHeight > 25) { // do not display too big texts.
-				newFontHeight = 25;
+			if (newFontHeight > 10) { // do not display too big texts.
+				newFontHeight = 10;
 			}
 			d3.selectAll(".y.axis text").style("font-size", newFontHeight + "px");
-			
+
 			//Adds a tip if font size is quite small.
 			if (newFontHeight < 12) {
 				d3.selectAll(".y.axis text")
@@ -144,10 +144,10 @@ d3.gantt = function () {
 					.on('mouseover', null)
 					.on('mouseout', null);
 			}
-			
+
 		}
 	}
-	
+
 	var initTip = function(selection) {
 		if (d3.tip) {
 			//tip on bars.
@@ -157,7 +157,7 @@ d3.gantt = function () {
 			  .direction("s")
 			  .html(tipFunction);
 			selection.call(tipBar);
-			
+
 			//tip on y axis.
 			tipYAxis=d3.tip().attr('class', 'd3-tip')
 				.offset([10, 0])
@@ -170,7 +170,7 @@ d3.gantt = function () {
 				show = function() {};
 				hide = function() {};
 			};
-			
+
 			tipYAxis=function() {
 				show = function() {};
 				hide = function() {};
@@ -187,7 +187,7 @@ d3.gantt = function () {
 			taskTypes[index] = tasks[index].taskName;
 		}
 	};
-	
+
 	function gantt(tasks) {
 
 		initTimeDomain(tasks);
@@ -195,7 +195,7 @@ d3.gantt = function () {
 		initAxis();
 
 		var ganttChartGroup = d3.select("body")
-			.append("svg") // svg global chart 
+			.append("svg") // svg global chart
 			.attr("class", "chart")
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
@@ -204,7 +204,7 @@ d3.gantt = function () {
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
 			.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-		if (activateZooming) {			
+		if (activateZooming) {
 			//zoom declaration done here because otherwise x and y could not be initialized.
 			var zoom = d3.behavior.zoom()
 				.x(x)
@@ -212,16 +212,16 @@ d3.gantt = function () {
 				.on("zoom", function() {zoomed(tasks)});
 			ganttChartGroup.call(zoom); //bind the zoom event listener.
 		}
-		
+
 		var zoomRect = ganttChartGroup.append("rect") //adds a rect in order to be able to zoom from wherever on the svg.
 			.attr("class", "zoom-rect")
 			.attr("width", width)
 			.attr("height", height)
 			.style("fill", "none")
 			.style("pointer-events", "all");
-		
+
 		ganttChartGroup.call(initTip); //allow tip on elements.
-		
+
 		//add axis before rect contents for z-index considerations : axis should be under usefull content.
 		ganttChartGroup.append("g").attr("class", "x axis") //append x axis
 			.attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")")
@@ -231,7 +231,7 @@ d3.gantt = function () {
 		ganttChartGroup.append("g").attr("class", "y axis")  //append y axis
 			.transition()
 			.call(yAxis);
-		
+
 		//addition of a clipping path in order to hide the panned or zoomed elements.
 		ganttChartGroup.append("clipPath")
 				.attr("id", "clipID")
@@ -240,13 +240,13 @@ d3.gantt = function () {
 				.attr("y", 0)
 				.attr("width", width)
 				.attr("height", height);
-		
-		//adds the usefull content : rectangles for each task.
+
+		//adds the useful content : rectangles for each task.
 		var rectGroup = ganttChartGroup.append("g").attr("clip-path","url(#clipID)").attr("class", "rect-group");
 		//right and left lines of the gantt.
 		rectGroup.append("line").attr("id", "rightLine").attr("class", "blockLine").attr("x1", width + 5).attr("y1", 0).attr("x2", width + 5).attr("y2", height - margin.top - margin.bottom);
 		rectGroup.append("line").attr("id", "leftLine").attr("class", "blockLine").attr("x1", -5).attr("y1", 0).attr("x2", -5).attr("y2", height - margin.top - margin.bottom);
-		
+
 		rectGroup.selectAll(".chart")
 			.data(tasks, keyFunction).enter()
 			.append("rect") //append all rect for the gantt graph.
@@ -279,7 +279,7 @@ d3.gantt = function () {
 			;
 
 		updateFontSizeYAxis();
-		
+
 		return gantt;
 
 	};
@@ -295,14 +295,14 @@ d3.gantt = function () {
 		svg.transition()
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom);
-			
+
 		var ganttChartGroup = svg.select(".gantt-chart");
 		ganttChartGroup.transition()
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
 			.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
-		
-		if (activateZooming) {			
+
+		if (activateZooming) {
 			//zoom declaration done here because otherwise x and y could not be initialized.
 			var zoom = d3.behavior.zoom()
 				.x(x)
@@ -310,7 +310,7 @@ d3.gantt = function () {
 				.on("zoom", function() {zoomed(tasks)});
 			ganttChartGroup.call(zoom); //bind the zoom event listener.
 		}
-		
+
 		svg.select(".zoom-rect").transition()
 			.attr("width", width)
 			.attr("height", height);
@@ -319,10 +319,10 @@ d3.gantt = function () {
 		svg.select("#clipID rect")
 			.attr("width", width)
 			.attr("height", height);
-		
+
 		ganttChartGroup.select(".x.axis")
 			.attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")");
-		
+
 		ganttChartGroup.call(initTip); //allow tip on elements.
 
 		var rectGroup = ganttChartGroup.select(".rect-group");
@@ -330,7 +330,7 @@ d3.gantt = function () {
 		var scale = d3.event ? d3.event.scale : 1 ;
 		var translate = d3.event ? d3.event.translate[0] : 0;
 		rectGroup.selectAll(".blockLine").attr("transform", "translate(" + [translate, 0] + ") scale(" + scale + ", 1)");
-		
+
 		var rect = rectGroup.selectAll("rect").data(tasks, keyFunction);
 		rect.enter()
 			.insert("rect", ":first-child")
@@ -414,7 +414,7 @@ d3.gantt = function () {
 		taskTypes = value;
 		return gantt;
     };
-	
+
 	gantt.taskStatus = function (value) {
 		if (!arguments.length)
 			return taskStatus;
@@ -442,21 +442,21 @@ d3.gantt = function () {
 		rectRound = value;
 		return gantt;
 	};
-	
+
 	gantt.tickFormat = function (value) {
 		if (!arguments.length)
 			return tickFormat;
 		tickFormat = value;
 		return gantt;
 	};
-	
+
 	gantt.tipFunction = function (value) {
 		if (!arguments.length)
 			return tipFunction;
 		tipFunction = value;
 		return gantt;
 	};
-	
+
 	gantt.clickFunction = function (value) {
 		if (!arguments.length)
 			return clickFunction;
@@ -464,20 +464,20 @@ d3.gantt = function () {
 		clickFunctionOverriden = true;
 		return gantt;
 	};
-	
+
 	gantt.horizontalLines = function (value) {
 		if (!arguments.length)
 			return horizontalLines;
 		horizontalLines = value;
 		return gantt;
 	};
-	
+
 	gantt.activateZooming = function (value) {
 		if (!arguments.length)
 			return activateZooming;
 		activateZooming = value;
 		return gantt;
 	};
-	
+
 	return gantt;
 };

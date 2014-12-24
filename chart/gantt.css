@@ -3,6 +3,7 @@ html,body,#wrapper {
 	height: 100%;
 	margin: 0px;
 	padding: 0px;
+	display: block;
 }
 
 h1 {
@@ -11,8 +12,11 @@ h1 {
 }
 
 .chart {
-	font-family: Arial, sans-serif;
+	font-family: 14px Helvetica Neue;
 	font-size: 12px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto
 }
 
 /* zoom style */
@@ -43,16 +47,18 @@ h1 {
 	shape-rendering: crispEdges;
 }
 
-.bar {
+.bar-running {
 	fill: #669900;
 	stroke-width:1;
 	stroke:black;
 }
 
-.bar-failed {
-	fill: #CC0000;
-	stroke-width:1;
-	stroke:black;
+.bar-done {
+	fill: #33b5e5;
+}
+
+.bar-planned {
+	fill: #BBDEFB;
 }
 
 .eoj {
@@ -65,7 +71,6 @@ h1 {
 
 .d3-tip {
   line-height: 1;
-  font-weight: bold;
   padding: 12px;
   background: rgba(0, 0, 0, 0.8);
   color: #fff;

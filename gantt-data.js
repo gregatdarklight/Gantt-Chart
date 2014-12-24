@@ -59,7 +59,7 @@ var tasks = [
   "taskName" : "Report polishing",
   "status" : "PLANNED",
   "data" : {
-    "link" : "https://www.sharelatex.com/project/549aa5690a2a615c0c7ef551/output/output.pdf",
+    "link" : "report.pdf",
     "report" : "Work on the report will be continuous <br>throughout the project, but reviewing and <br>cleaning it up will probably be necessary."
   }
 },

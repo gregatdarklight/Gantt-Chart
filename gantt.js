@@ -63,7 +63,7 @@ var format = "W%U";
 var gantt = d3.gantt().chartParent('gantt-chart').taskStatus(taskStatus).tickFormat(format);
 gantt.showBounds(false);
 gantt.tipFunction(taskTipCompute).clickFunction(clickFunction)
-gantt.margin({top : 20, right : 40, bottom : 20, left : 200});
+gantt.margin({top : 20, right : 40, bottom : 20, left : 100});
 gantt.width(getWidthForGraph(gantt));
 gantt.height(getHeightForGraph(gantt));
 gantt.rectRound(1);

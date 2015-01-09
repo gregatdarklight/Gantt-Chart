@@ -1,7 +1,7 @@
 var tasks = [
 {
   "startDate": new Date("Feb 9 2015"),
-  "endDate": new Date("Feb 13 2015"),
+  "endDate": new Date("Feb 10 2015"),
   "taskName" : "Setup",
   "status" : "PLANNED",
   "data" : {

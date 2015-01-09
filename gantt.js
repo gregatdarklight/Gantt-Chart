@@ -60,7 +60,8 @@ function getWidthForGraph(gantt) {
 
 //First display of the gantt.
 var format = "W%U";
-var gantt = d3.gantt().taskStatus(taskStatus).tickFormat(format);
+var gantt = d3.gantt().chartParent('gantt-chart').taskStatus(taskStatus).tickFormat(format);
+gantt.showBounds(false);
 gantt.tipFunction(taskTipCompute).clickFunction(clickFunction)
 gantt.margin({top : 20, right : 40, bottom : 20, left : 200});
 gantt.width(getWidthForGraph(gantt));

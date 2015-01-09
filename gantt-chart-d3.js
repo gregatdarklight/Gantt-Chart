@@ -2,11 +2,19 @@
  *
  * @author Dimitry Kudrayvtsev
  * @version 2.x
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  */
 
 d3.gantt = function () {
 	var FIT_TIME_DOMAIN_MODE = "fit";
 	var FIXED_TIME_DOMAIN_MODE = "fixed";
+	
 	//default margins
 	var margin = {
 		top : 20,
@@ -25,9 +33,13 @@ d3.gantt = function () {
 	var timeDomainMode = FIT_TIME_DOMAIN_MODE; // fixed or fit
 	var taskTypes = [];
 	var taskStatus = [];
-	var height = document.body.clientHeight - margin.top - margin.bottom - 5;
-	var width = document.body.clientWidth - margin.right - margin.left - 5;
 
+	var width, height;
+	//define defaults for parent element of the gantt chart and the  class name to be applied to the svg - useful if multiple charts are being displayed on a page.
+	var chartParent = 'body';
+	var svgClass = 'chart';
+	var showBounds=true;
+	
 	var tickFormat = "%H:%M";
 
 	var tipBar, tipYAxis;
@@ -57,7 +69,7 @@ d3.gantt = function () {
 
 	var activateZooming = false;
 	var zoomed = function(tasks) { //zoomed function
-		var svg = d3.select(".chart");
+		var svg = d3.select('.'+svgClass);
 		//update x axis only while zooming
 		svg.select(".x.axis").call(xAxis);
 
@@ -123,6 +135,23 @@ d3.gantt = function () {
 			.tickSize(tickSizeWidth);
 	};
 
+	var initDimensions = function() {
+		if (chartParent=='body') {
+			height = document.body.clientHeight - (margin.right + margin.left)-5;
+			width = document.body.clientWidth - (margin.right + margin.left)-5;
+		}
+		else {
+			height = (document.getElementById(chartParent)).clientHeight - (margin.top + margin.bottom)-5;
+			width = (document.getElementById(chartParent)).clientWidth - (margin.right + margin.left)-5;
+		}	
+
+		x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
+		y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
+		xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
+			.tickSize(8).tickPadding(8);
+		yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);	
+	}	
+	
 	var updateFontSizeYAxis = function() {
 		//compute the height of the font for the yAxis (necessary for lots of values).
 		var currYAxis = d3.select(".y.axis text");
@@ -190,13 +219,19 @@ d3.gantt = function () {
 
 	function gantt(tasks) {
 
+		initDimensions();
 		initTimeDomain(tasks);
 		computeTasksTypes(tasks);
 		initAxis();
-
-		var ganttChartGroup = d3.select("body")
+		
+		var parentElement='#'+chartParent;
+		if (chartParent=='body') {
+			parentElement='body';
+		}		
+		
+		var ganttChartGroup = d3.select(parentElement)
 			.append("svg") // svg global chart
-			.attr("class", "chart")
+			.attr("class", svgClass)
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
 			.append("g") // ganttChartGroup for all svg content.
@@ -204,6 +239,7 @@ d3.gantt = function () {
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
 			.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+			
 		if (activateZooming) {
 			//zoom declaration done here because otherwise x and y could not be initialized.
 			var zoom = d3.behavior.zoom()
@@ -244,10 +280,12 @@ d3.gantt = function () {
 		//adds the useful content : rectangles for each task.
 		var rectGroup = ganttChartGroup.append("g").attr("clip-path","url(#clipID)").attr("class", "rect-group");
 		//right and left lines of the gantt.
-		rectGroup.append("line").attr("id", "rightLine").attr("class", "blockLine").attr("x1", width + 5).attr("y1", 0).attr("x2", width + 5).attr("y2", height - margin.top - margin.bottom);
-		rectGroup.append("line").attr("id", "leftLine").attr("class", "blockLine").attr("x1", -5).attr("y1", 0).attr("x2", -5).attr("y2", height - margin.top - margin.bottom);
-
-		rectGroup.selectAll(".chart")
+		if (showBounds) {
+			rectGroup.append("line").attr("id", "rightLine").attr("class", "blockLine").attr("x1", width + 5).attr("y1", 0).attr("x2", width + 5).attr("y2", height - margin.top - margin.bottom);
+			rectGroup.append("line").attr("id", "leftLine").attr("class", "blockLine").attr("x1", -5).attr("y1", 0).attr("x2", -5).attr("y2", height - margin.top - margin.bottom);
+		}
+			
+		rectGroup.selectAll('.'+svgClass)
 			.data(tasks, keyFunction).enter()
 			.append("rect") //append all rect for the gantt graph.
 			.attr("rx", rectRound)
@@ -264,8 +302,10 @@ d3.gantt = function () {
 				return y.rangeBand();
 			})
 			.attr("width", function (d) {
-				return (x(d.endDate) - x(d.startDate));
+				 var theWidth = x(d.endDate) - x(d.startDate);
+				 return (theWidth); 
 			})
+			
 			.on('mouseover', tipBar.show)
 			.on('mouseout', tipBar.hide)
 			.on('click', clickFunction)
@@ -359,7 +399,8 @@ d3.gantt = function () {
 				return y.rangeBand();
 			})
 			.attr("width", function (d) {
-				return (x(d.endDate) - x(d.startDate));
+				var theWidth = x(d.endDate) - x(d.startDate);
+				return (theWidth); 
 			});
 
 		rect.transition()
@@ -368,7 +409,9 @@ d3.gantt = function () {
 				return y.rangeBand();
 			})
 			.attr("width", function (d) {
-				return (x(d.endDate) - x(d.startDate));
+				var theWidth = x(d.endDate) - x(d.startDate);
+				return (theWidth); 
+
 			});
 
 		rect.exit().remove();
@@ -479,5 +522,31 @@ d3.gantt = function () {
 		return gantt;
 	};
 
+	//allow the parent element ID of the SVG to be specified - defaults to the HTML body
+	gantt.chartParent = function(value) {
+		if (!arguments.length) 
+			return chartParent;
+		chartParent=value;
+		return gantt;
+	}
+
+	//specify the class name to be applied to the SVG - defaults to class
+	gantt.svgClass = function(value) {
+		if (!arguments.length) 
+			return svgClass;
+		svgClass=value;
+		
+		return gantt;
+	}	
+
+	//specify whether to show the left and right bounds of the gantt chart entries	
+	gantt.showBounds = function(value) {
+		if (!arguments.length) 
+			return showBounds;
+		showBounds=value;
+		return gantt;
+	}	
+	
+	
 	return gantt;
 };
